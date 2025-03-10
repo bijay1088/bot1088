@@ -4,11 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import aiohttp
-<<<<<<< HEAD
 from datetime import datetime, timedelta
-=======
-from datetime import datetime
->>>>>>> 8625a649efdad5e4e855ffba42f9e408769b9bf6
 import re
 
 class WarframeCog(commands.Cog):
@@ -211,11 +207,7 @@ class WarframeCog(commands.Cog):
         
         await interaction.response.send_message(embed=embed, allowed_mentions=discord.AllowedMentions(users=[interaction.user]))
 
-<<<<<<< HEAD
     """
-=======
-
->>>>>>> 8625a649efdad5e4e855ffba42f9e408769b9bf6
     #alerts
     @app_commands.command(name="alert", description="Send current alert.")
     async def alert(self, interaction: discord.Interaction):
@@ -244,10 +236,7 @@ class WarframeCog(commands.Cog):
 
         
         await interaction.response.send_message(embed=embed, allowed_mentions=discord.AllowedMentions(users=[interaction.user]))
-<<<<<<< HEAD
         """
-=======
->>>>>>> 8625a649efdad5e4e855ffba42f9e408769b9bf6
 
     
     #nightwave
