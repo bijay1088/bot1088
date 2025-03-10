@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import aiohttp
-from datetime import datetime, timedelta
+from datetime import datetime
 import re
 
 class WarframeCog(commands.Cog):
@@ -207,7 +207,7 @@ class WarframeCog(commands.Cog):
         
         await interaction.response.send_message(embed=embed, allowed_mentions=discord.AllowedMentions(users=[interaction.user]))
 
-    """
+
     #alerts
     @app_commands.command(name="alert", description="Send current alert.")
     async def alert(self, interaction: discord.Interaction):
@@ -236,7 +236,6 @@ class WarframeCog(commands.Cog):
 
         
         await interaction.response.send_message(embed=embed, allowed_mentions=discord.AllowedMentions(users=[interaction.user]))
-        """
 
     
     #nightwave
@@ -310,52 +309,43 @@ class WarframeCog(commands.Cog):
     #events
     @app_commands.command(name="events", description="Send current events.")
     async def events(self, interaction:discord.Interaction):
-        try:
-            eventjson = await self.getWarframeData("events")
-            if eventjson == None:
-                await interaction.response.send_message("Something went wrong.")
-                return
-
-            embed = discord.Embed(title="Current Events")
-            for i in range(len(eventjson)):
-                expiry_timestamp = self.convertTimestamp(eventjson[i]["expiry"])
-                started_timestamp = self.convertTimestamp(eventjson[i]["activation"])
-                event_value = (
-                    (f"\n{eventjson[i]['tooltip']}" if 'tooltip' in eventjson[i] else '') +
-                    f"\nStarted: <t:{int(started_timestamp)}:R>"
-                    f"\nExpiry: <t:{int(expiry_timestamp)}:R>" 
-                )
-                embed.add_field(name=f"{eventjson[i]['description']}", value=event_value, inline=False)
-
-            await interaction.response.send_message(embed=embed, allowed_mentions=discord.AllowedMentions(users=[interaction.user]))
-
-        except Exception as e:
-            print(e)
+        eventjson = await self.getWarframeData("events")
+        if eventjson == None:
             await interaction.response.send_message("Something went wrong.")
+            return
+
+        embed = discord.Embed(title="Current Events")
+        for i in range(len(eventjson)):
+            expiry_timestamp = self.convertTimestamp(eventjson[i]["expiry"])
+            started_timestamp = self.convertTimestamp(eventjson[i]["activation"])
+            event_value = (
+                f"\n{eventjson[i]['tooltip']}"
+                f"\nStarted: <t:{int(started_timestamp)}:R>"
+                f"\nExpiry: <t:{int(expiry_timestamp)}:R>" 
+            )
+            embed.add_field(name=f"{eventjson[i]['description']}", value=event_value, inline=False)
+
+        await interaction.response.send_message(embed=embed, allowed_mentions=discord.AllowedMentions(users=[interaction.user]))
 
     #dailyReset shows the time of daily reset
     @app_commands.command(name="daily", description="Send the time of daily reset.")
-    async def dailyReset(self, interaction: discord.Interaction):
-        try:
-            now = datetime.utcnow()
-            # for daily reset of 0:00 UTC
-            reset0 = datetime(now.year, now.month, now.day, 0, 0, 0)
-            if now.hour >= 0:
-                reset0 += timedelta(days=1)
-
-            # for daily reset of 17:00 UTC
-            reset17 = datetime(now.year, now.month, now.day, 17, 0, 0)
-            if now.hour >= 17:
-                reset17 += timedelta(days=1)
-
-            embed = discord.Embed(title="Daily Reset")
-            embed.add_field(name="For Daily Tribute, Nightwave, Steel Path, Syndicate Standing, Focus, Trades, Argon, Acrithis", value=f"<t:{int(reset0.timestamp())}:R>", inline=False)
-            embed.add_field(name="For Sortie, Syndicate Alerts", value=f"<t:{int(reset17.timestamp())}:R>", inline=False)
-            await interaction.response.send_message(embed=embed, allowed_mentions=discord.AllowedMentions(users=[interaction.user]))
-        except Exception as e:
-            print(e)
-            await interaction.response.send_message("Something went wrong!")
+    async def dailyReset(self, interaction:discord.Interaction):
+        now = datetime.now()
+        #for daily reset of 0:00 UTC
+        reset0 = datetime(now.year, now.month, now.day, 0, 0, 0)
+        if now.hour >= 0:
+            reset0 = reset0.replace(day=reset0.day + 1)
         
+        #for daily reset of 17:00 UTC
+        reset17 = datetime(now.year, now.month, now.day, 17, 0, 0)
+        if now.hour >= 17:
+            reset17 = reset17.replace(day=reset17.day + 1)
+        
+        embed = discord.Embed(title="Daily Reset")
+        embed.add_field(name="For Daily Tribute, Nightwave, Steel Path, Syndicate Standing, Focus, Trades, Argon, Acrithis", value=f"<t:{int(reset0.timestamp())}:R>", inline=False)
+        embed.add_field(name="For Sortie, Syndicate Alerts", value=f"<t:{int(reset17.timestamp())}:R>", inline=False)
+        await interaction.response.send_message(embed=embed, allowed_mentions=discord.AllowedMentions(users=[interaction.user]))
+    
 
 
 
